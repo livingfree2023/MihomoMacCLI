@@ -18,7 +18,7 @@ MIHOMO_SERVICE_SCRIPT="$MIHOMO_CONFIG_DIR/mihomo-service.sh"
 MIHOMO_PLIST="$HOME/Library/LaunchAgents/com.mihomo.service.plist"
 MIHOMO_LOG="$MIHOMO_CONFIG_DIR/service.log"
 MIHOMO_ERR="$MIHOMO_CONFIG_DIR/service.err"
-MIHOMO_INTERFACE="Wi-Fi"
+MIHOMO_INTERFACE_FILE="$MIHOMO_CONFIG_DIR/.interface"
 GITHUB_API="https://api.github.com/repos/MetaCubeX/mihomo/releases/latest"
 MIHOMO_LANG_FILE="$MIHOMO_CONFIG_DIR/.lang"
 
@@ -39,8 +39,8 @@ STR_EN[invalid_option]="Invalid option"
 STR_ZH[invalid_option]="无效选项"
 STR_EN[press_enter]="Press Enter to continue..."
 STR_ZH[press_enter]="按回车键继续..."
-STR_EN[menu_prompt]="Choose an option [0-8]"
-STR_ZH[menu_prompt]="请选择 [0-8]"
+STR_EN[menu_prompt]="Choose an option [0-9]"
+STR_ZH[menu_prompt]="请选择 [0-9]"
 
 # Menu items
 STR_EN[menu_install]="Install Mihomo"
@@ -254,6 +254,26 @@ STR_ZH[language_prompt]="选择语言 [1] English [2] 中文"
 STR_EN[language_set]="Language set to English"
 STR_ZH[language_set]="语言已设置为中文"
 
+# Interface
+STR_EN[menu_interface]="Network Interface"
+STR_ZH[menu_interface]="网络接口"
+STR_EN[menu_interface_desc]="Select network interface for proxy"
+STR_ZH[menu_interface_desc]="选择代理使用的网络接口"
+STR_EN[interface_header]="── Network Interface ──"
+STR_ZH[interface_header]="── 网络接口 ──"
+STR_EN[interface_prompt]="Select network interface"
+STR_ZH[interface_prompt]="选择网络接口"
+STR_EN[interface_set]="Network interface set to: %s"
+STR_ZH[interface_set]="网络接口已设置为: %s"
+STR_EN[interface_current]="Interface: %s"
+STR_ZH[interface_current]="网络接口: %s"
+STR_EN[interface_detected]="Auto-detected interface: %s"
+STR_ZH[interface_detected]="自动检测到接口: %s"
+STR_EN[interface_no_active]="No active interface found, using Wi-Fi"
+STR_ZH[interface_no_active]="未找到活跃接口，使用 Wi-Fi"
+STR_EN[interface_restart_hint]="Restart the service (Option 4) to apply the new interface."
+STR_ZH[interface_restart_hint]="请重启服务（选项 4）以应用新接口。"
+
 # ---------------------------------------------------------------------------
 # i18n Lookup
 # ---------------------------------------------------------------------------
@@ -342,6 +362,90 @@ if [[ -f "$MIHOMO_LANG_FILE" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Network Interface
+# ---------------------------------------------------------------------------
+
+detect_active_interface() {
+    local services
+    services=$(networksetup -listallnetworkservices 2>/dev/null | tail -n +2)
+    while IFS= read -r svc; do
+        [[ "$svc" == \** ]] && continue
+        local ip
+        ip=$(networksetup -getinfo "$svc" 2>/dev/null | grep "^IP address:" | awk '{print $3}')
+        if [[ -n "$ip" && "$ip" != "none" ]]; then
+            echo "$svc"
+            return 0
+        fi
+    done <<< "$services"
+    echo "Wi-Fi"
+}
+
+select_interface() {
+    print ""
+    print "${BOLD}$(_ interface_header)${NC}"
+    print ""
+
+    local services=()
+    local i=1
+    local all_services
+    all_services=$(networksetup -listallnetworkservices 2>/dev/null | tail -n +2)
+
+    while IFS= read -r svc; do
+        [[ "$svc" == \** ]] && continue
+        services+=("$svc")
+        local ip
+        ip=$(networksetup -getinfo "$svc" 2>/dev/null | grep "^IP address:" | awk '{print $3}')
+        if [[ "$svc" == "$MIHOMO_INTERFACE" ]]; then
+            print "  ${GREEN}[${i}]${NC} ${BOLD}${svc}${NC} ${GREEN}← $(_ active_label)${NC}"
+        elif [[ -n "$ip" && "$ip" != "none" ]]; then
+            print "  ${BOLD}[${i}]${NC} ${svc} (IP: ${ip})"
+        else
+            print "  ${BOLD}[${i}]${NC} ${svc}"
+        fi
+        ((i++))
+    done <<< "$all_services"
+
+    if [[ ${#services[@]} -eq 0 ]]; then
+        warn "$(_ interface_no_active)"
+        return 1
+    fi
+
+    print ""
+    print -n "${CYAN}$(_ interface_prompt): ${NC}"
+    local choice
+    read -r choice
+
+    if [[ -z "$choice" ]]; then
+        info "$(_ cancelled)"
+        return 0
+    fi
+
+    if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#services[@]} )); then
+        error "$(_ invalid_selection)"
+        return 1
+    fi
+
+    MIHOMO_INTERFACE="${services[$choice]}"
+    mkdir -p "$MIHOMO_CONFIG_DIR"
+    print "$MIHOMO_INTERFACE" > "$MIHOMO_INTERFACE_FILE"
+    success "$(_ interface_set "$MIHOMO_INTERFACE")"
+
+    if is_service_running; then
+        warn "$(_ interface_restart_hint)"
+    fi
+}
+
+# Load interface preference
+MIHOMO_INTERFACE=$(detect_active_interface)
+if [[ -f "$MIHOMO_INTERFACE_FILE" ]]; then
+    _saved_iface=$(tr -d '[:space:]' < "$MIHOMO_INTERFACE_FILE")
+    if [[ -n "$_saved_iface" ]]; then
+        MIHOMO_INTERFACE="$_saved_iface"
+    fi
+    unset _saved_iface
+fi
+
+# ---------------------------------------------------------------------------
 # Port Extraction
 # ---------------------------------------------------------------------------
 
@@ -427,6 +531,8 @@ show_status() {
     else
         warn "$(_ service_not_running)"
     fi
+
+    info "$(_ interface_current "$MIHOMO_INTERFACE")"
 
     print "${BOLD}═══════════════════════════════════════════════════${NC}"
 }
@@ -948,6 +1054,9 @@ show_menu() {
     print "  ${BOLD}[8]${NC} $(_ menu_language)"
     print "        $(_ menu_language_desc)"
     print ""
+    print "  ${BOLD}[9]${NC} $(_ menu_interface)"
+    print "        $(_ menu_interface_desc)"
+    print ""
     print "  ${BOLD}[0]${NC} $(_ menu_exit)"
     print ""
     print "${BOLD}───────────────────────────────────────────────────────${NC}"
@@ -969,6 +1078,7 @@ main() {
             6) open_panel; press_enter ;;
             7) uninstall_all; press_enter ;;
             8) select_language; press_enter ;;
+            9) select_interface; press_enter ;;
             0|q|Q)
                 print ""
                 print "${GREEN}$(_ goodbye)${NC}"
