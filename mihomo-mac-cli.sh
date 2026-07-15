@@ -464,7 +464,7 @@ install_mihomo() {
 
     # Extract version tag
     local tag
-    tag=$(echo "$release_json" | python3 -c "import sys,json; print(json.load(sys.stdin)['tag_name'])" 2>/dev/null) || {
+    tag=$(echo "$release_json" | python3 -c "import sys,json; print(json.loads(sys.stdin.read(), strict=False)['tag_name'])" 2>/dev/null) || {
         error "$(_ parse_failed)"
         return 1
     }
@@ -475,7 +475,7 @@ install_mihomo() {
     local download_url
     download_url=$(echo "$release_json" | python3 -c "
 import sys, json
-data = json.load(sys.stdin)
+data = json.loads(sys.stdin.read(), strict=False)
 for asset in data.get('assets', []):
     if '${asset_name}' in asset['name']:
         print(asset['browser_download_url'])
@@ -487,7 +487,7 @@ for asset in data.get('assets', []):
         asset_name="mihomo-darwin-${arch}.gz"
         download_url=$(echo "$release_json" | python3 -c "
 import sys, json
-data = json.load(sys.stdin)
+data = json.loads(sys.stdin.read(), strict=False)
 for asset in data.get('assets', []):
     name = asset['name']
     if 'darwin' in name and '${arch}' in name and name.endswith('.gz') and 'compatible' not in name:
