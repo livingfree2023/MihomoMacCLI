@@ -11,11 +11,11 @@ set -euo pipefail
 # Constants
 # ---------------------------------------------------------------------------
 MIHOMO_BIN="/usr/local/bin/mihomo"
-MIHOMO_CONFIG_DIR="$HOME/.config/mihomo"
+MIHOMO_CONFIG_DIR="$HOME/.config/mihomo-mac-cli"
 MIHOMO_CONFIGS_DIR="$MIHOMO_CONFIG_DIR/configs"
 MIHOMO_CONFIG="$MIHOMO_CONFIG_DIR/config.yaml"
 MIHOMO_SERVICE_SCRIPT="$MIHOMO_CONFIG_DIR/mihomo-service.sh"
-MIHOMO_PLIST="$HOME/Library/LaunchAgents/com.mihomo.service.plist"
+MIHOMO_PLIST="$HOME/Library/LaunchAgents/com.mihomo-mac-cli.service.plist"
 MIHOMO_LOG="$MIHOMO_CONFIG_DIR/service.log"
 MIHOMO_ERR="$MIHOMO_CONFIG_DIR/service.err"
 MIHOMO_INTERFACE_FILE="$MIHOMO_CONFIG_DIR/.interface"
@@ -483,7 +483,7 @@ get_active_config_name() {
 # ---------------------------------------------------------------------------
 
 is_service_running() {
-    launchctl print gui/$(id -u)/com.mihomo.service &>/dev/null
+    launchctl print gui/$(id -u)/com.mihomo-mac-cli.service &>/dev/null
 }
 
 is_binary_installed() {
@@ -838,7 +838,7 @@ generate_plist() {
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.mihomo.service</string>
+    <string>com.mihomo-mac-cli.service</string>
     <key>ProgramArguments</key>
     <array>
         <string>${MIHOMO_SERVICE_SCRIPT}</string>

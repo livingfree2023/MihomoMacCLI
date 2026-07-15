@@ -97,7 +97,7 @@ Exit the manager.
 
 ```
 /usr/local/bin/mihomo                          # Mihomo binary
-~/.config/mihomo/
+~/.config/mihomo-mac-cli/
 ├── config.yaml                                # Symlink to active config
 ├── configs/                                   # All imported configurations
 │   ├── home.yaml
@@ -108,7 +108,7 @@ Exit the manager.
 └── service.err                                # Service stderr log
 
 ~/Library/LaunchAgents/
-└── com.mihomo.service.plist                   # Launchd service definition
+└── com.mihomo-mac-cli.service.plist                   # Launchd service definition
 ```
 
 ---
@@ -136,7 +136,7 @@ For a complete example with DNS, proxy providers, and routing rules, see the [mi
 
 2. **System Proxy**: When the service starts, it uses `networksetup` to configure HTTP, HTTPS, and SOCKS proxy settings on the Wi-Fi interface.
 
-3. **Config Switching**: Multiple configurations are stored in `~/.config/mihomo/configs/`. The active configuration is a symlink at `~/.config/mihomo/config.yaml`.
+3. **Config Switching**: Multiple configurations are stored in `~/.config/mihomo-mac-cli/configs/`. The active configuration is a symlink at `~/.config/mihomo-mac-cli/config.yaml`.
 
 4. **Port Detection**: The script parses your YAML configuration to extract the proxy port, ensuring the system proxy matches your mihomo settings.
 
@@ -149,7 +149,7 @@ For a complete example with DNS, proxy providers, and routing rules, see the [mi
 Check the error log:
 
 ```bash
-cat ~/.config/mihomo/service.err
+cat ~/.config/mihomo-mac-cli/service.err
 ```
 
 **Proxy not working**
@@ -157,7 +157,7 @@ cat ~/.config/mihomo/service.err
 1. Verify the service is running:
 
 ```bash
-launchctl print gui/$(id -u)/com.mihomo.service
+launchctl print gui/$(id -u)/com.mihomo-mac-cli.service
 ```
 
 2. Check system proxy settings:
@@ -169,7 +169,7 @@ networksetup -getwebproxy Wi-Fi
 3. Verify your configuration is valid:
 
 ```bash
-/usr/local/bin/mihomo -t -f ~/.config/mihomo/config.yaml
+/usr/local/bin/mihomo -t -f ~/.config/mihomo-mac-cli/config.yaml
 ```
 
 **Can't connect to API providers**
@@ -191,8 +191,8 @@ Or manually:
 
 ```bash
 # Stop and remove service
-launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.mihomo.service.plist
-rm ~/Library/LaunchAgents/com.mihomo.service.plist
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.mihomo-mac-cli.service.plist
+rm ~/Library/LaunchAgents/com.mihomo-mac-cli.service.plist
 
 # Remove binary
 sudo rm /usr/local/bin/mihomo

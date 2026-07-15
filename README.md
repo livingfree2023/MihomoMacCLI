@@ -97,7 +97,7 @@ curl -fsSL https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mi
 
 ```
 /usr/local/bin/mihomo                          # Mihomo 程序
-~/.config/mihomo/
+~/.config/mihomo-mac-cli/
 ├── config.yaml                                # 指向当前配置的符号链接
 ├── configs/                                   # 所有导入的配置
 │   ├── home.yaml
@@ -108,7 +108,7 @@ curl -fsSL https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mi
 └── service.err                                # 服务错误输出日志
 
 ~/Library/LaunchAgents/
-└── com.mihomo.service.plist                   # Launchd 服务定义
+└── com.mihomo-mac-cli.service.plist                   # Launchd 服务定义
 ```
 
 ---
@@ -136,7 +136,7 @@ mode: rule
 
 2. **系统代理**：服务启动时，使用 `networksetup` 在 Wi-Fi 接口上配置 HTTP、HTTPS 和 SOCKS 代理设置。
 
-3. **配置切换**：多个配置存储在 `~/.config/mihomo/configs/` 中。当前激活的配置是 `~/.config/mihomo/config.yaml` 的符号链接。
+3. **配置切换**：多个配置存储在 `~/.config/mihomo-mac-cli/configs/` 中。当前激活的配置是 `~/.config/mihomo-mac-cli/config.yaml` 的符号链接。
 
 4. **端口检测**：脚本解析您的 YAML 配置以提取代理端口，确保系统代理与您的 mihomo 设置匹配。
 
@@ -149,7 +149,7 @@ mode: rule
 检查错误日志：
 
 ```bash
-cat ~/.config/mihomo/service.err
+cat ~/.config/mihomo-mac-cli/service.err
 ```
 
 **代理不工作**
@@ -157,7 +157,7 @@ cat ~/.config/mihomo/service.err
 1. 验证服务是否运行：
 
 ```bash
-launchctl print gui/$(id -u)/com.mihomo.service
+launchctl print gui/$(id -u)/com.mihomo-mac-cli.service
 ```
 
 2. 检查系统代理设置：
@@ -169,7 +169,7 @@ networksetup -getwebproxy Wi-Fi
 3. 验证配置是否有效：
 
 ```bash
-/usr/local/bin/mihomo -t -f ~/.config/mihomo/config.yaml
+/usr/local/bin/mihomo -t -f ~/.config/mihomo-mac-cli/config.yaml
 ```
 
 **无法连接到 API 提供者**
@@ -191,8 +191,8 @@ curl -fsSL https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mi
 
 ```bash
 # 停止并移除服务
-launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.mihomo.service.plist
-rm ~/Library/LaunchAgents/com.mihomo.service.plist
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.mihomo-mac-cli.service.plist
+rm ~/Library/LaunchAgents/com.mihomo-mac-cli.service.plist
 
 # 移除程序
 sudo rm /usr/local/bin/mihomo
