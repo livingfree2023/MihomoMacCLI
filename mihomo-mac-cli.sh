@@ -366,12 +366,11 @@ fi
 # ---------------------------------------------------------------------------
 
 detect_active_interface() {
-    local services
+    local services ip
     services=$(networksetup -listallnetworkservices 2>/dev/null | tail -n +2)
     while IFS= read -r svc; do
-        [[ "$svc" == \** ]] && continue
-        local ip
-        ip=$(networksetup -getinfo "$svc" 2>/dev/null | grep "^IP address:" | awk '{print $3}')
+        [[ -z "$svc" || "$svc" == \** ]] && continue
+        ip=$(networksetup -getinfo "$svc" 2>/dev/null | grep "^IP address:" | awk '{print $3}' || true)
         if [[ -n "$ip" && "$ip" != "none" ]]; then
             echo "$svc"
             return 0
@@ -387,14 +386,13 @@ select_interface() {
 
     local services=()
     local i=1
-    local all_services
+    local all_services ip
     all_services=$(networksetup -listallnetworkservices 2>/dev/null | tail -n +2)
 
     while IFS= read -r svc; do
-        [[ "$svc" == \** ]] && continue
+        [[ -z "$svc" || "$svc" == \** ]] && continue
         services+=("$svc")
-        local ip
-        ip=$(networksetup -getinfo "$svc" 2>/dev/null | grep "^IP address:" | awk '{print $3}')
+        ip=$(networksetup -getinfo "$svc" 2>/dev/null | grep "^IP address:" | awk '{print $3}' || true)
         if [[ "$svc" == "$MIHOMO_INTERFACE" ]]; then
             print "  ${GREEN}[${i}]${NC} ${BOLD}${svc}${NC} ${GREEN}← $(_ active_label)${NC}"
         elif [[ -n "$ip" && "$ip" != "none" ]]; then
