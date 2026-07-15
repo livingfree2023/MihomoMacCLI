@@ -335,10 +335,10 @@ select_language() {
 }
 
 # Load language preference
-LANGUAGE="en"
+LANGUAGE="zh"
 if [[ -f "$MIHOMO_LANG_FILE" ]]; then
     LANGUAGE=$(tr -d '[:space:]' < "$MIHOMO_LANG_FILE")
-    [[ "$LANGUAGE" != "zh" ]] && LANGUAGE="en"
+    [[ "$LANGUAGE" != "en" ]] && LANGUAGE="zh"
 fi
 
 # ---------------------------------------------------------------------------
