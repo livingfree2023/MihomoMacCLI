@@ -2,7 +2,15 @@
 
 > [中文文档](README.md)
 
-An all-in-one terminal UI for managing [mihomo](https://github.com/MetaCubeX/mihomo) proxy on macOS.
+**Install bare-metal Clash/Mihomo on macOS: run once, auto-starts on every boot.**
+
+---
+
+## Installation
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mihomo-mac-cli.sh | zsh
+```
 
 ---
 
@@ -29,34 +37,12 @@ An all-in-one terminal UI for managing [mihomo](https://github.com/MetaCubeX/mih
 
 ---
 
-## Installation
-
-1. Download the script:
-
-```bash
-curl -LO https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mihomo-mac-cli.sh
-```
-
-2. Make it executable:
-
-```bash
-chmod +x mihomo-mac-cli.sh
-```
-
-3. Run it:
-
-```bash
-./mihomo-mac-cli.sh
-```
-
----
-
 ## Usage
 
 Run the script to access the interactive menu:
 
 ```bash
-./mihomo-mac-cli.sh
+curl -fsSL https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mihomo-mac-cli.sh | zsh
 ```
 
 ### Menu Options
@@ -197,7 +183,7 @@ Ensure your proxy configuration includes proper DNS settings and that the mihomo
 To completely remove mihomo and all related files:
 
 ```bash
-./mihomo-mac-cli.sh
+curl -fsSL https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mihomo-mac-cli.sh | zsh
 # Select option [7] Uninstall
 ```
 

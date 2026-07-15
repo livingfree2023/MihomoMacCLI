@@ -2,7 +2,15 @@
 
 > [English](README_en.md)
 
-在 macOS 上管理 [mihomo](https://github.com/MetaCubeX/mihomo) 代理的一体化终端工具。
+**Mac OS 安装裸核 Clash/Mihomo 脚本：只需要执行一次，之后自动启动。**
+
+---
+
+## 安装
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mihomo-mac-cli.sh | zsh
+```
 
 ---
 
@@ -29,34 +37,12 @@
 
 ---
 
-## 安装
-
-1. 下载脚本：
-
-```bash
-curl -LO https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mihomo-mac-cli.sh
-```
-
-2. 添加执行权限：
-
-```bash
-chmod +x mihomo-mac-cli.sh
-```
-
-3. 运行：
-
-```bash
-./mihomo-mac-cli.sh
-```
-
----
-
 ## 使用方法
 
 运行脚本以访问交互式菜单：
 
 ```bash
-./mihomo-mac-cli.sh
+curl -fsSL https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mihomo-mac-cli.sh | zsh
 ```
 
 ### 菜单选项
@@ -197,7 +183,7 @@ networksetup -getwebproxy Wi-Fi
 要彻底移除 mihomo 及所有相关文件：
 
 ```bash
-./mihomo-mac-cli.sh
+curl -fsSL https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mihomo-mac-cli.sh | zsh
 # 选择选项 [7] 卸载
 ```
 
