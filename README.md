@@ -1,49 +1,49 @@
-# MihomoMacCLI
+# MihomoMacCLI - Mihomo 服务管理器
 
-> [中文文档](README_zh.md)
+> [English](README_en.md)
 
-An all-in-one terminal UI for managing [mihomo](https://github.com/MetaCubeX/mihomo) proxy on macOS.
-
----
-
-## Features
-
-- **Install Mihomo** - Automatically download and install the latest mihomo binary from GitHub releases
-- **Import Subscriptions** - Import proxy configurations from URLs or local .yaml files with custom naming
-- **Multi-Config Management** - Store multiple configurations and switch between them easily
-- **Launchd Service** - Install mihomo as a macOS system service that starts automatically
-- **System Proxy** - Automatically configure macOS system proxy settings
-- **Dynamic Port Detection** - Extract proxy port from configuration files (mixed-port or port)
-- **MetaCubeXD Dashboard** - Open the web-based management panel in your default browser
-- **Complete Uninstall** - Clean removal of service, binary, and all configuration files
+在 macOS 上管理 [mihomo](https://github.com/MetaCubeX/mihomo) 代理的一体化终端工具。
 
 ---
 
-## Requirements
+## 功能特性
 
-- macOS (tested on macOS 12+)
-- zsh shell (default on macOS)
+- **安装 Mihomo** - 自动从 GitHub 下载并安装最新的 mihomo 程序
+- **导入订阅** - 从 URL 或本地 .yaml 文件导入代理配置，支持自定义命名
+- **多配置管理** - 存储多个配置文件并轻松切换
+- **Launchd 服务** - 将 mihomo 安装为 macOS 系统服务，开机自动启动
+- **系统代理** - 自动配置 macOS 系统代理设置
+- **动态端口检测** - 从配置文件中提取代理端口（mixed-port 或 port）
+- **MetaCubeXD 面板** - 在默认浏览器中打开 Web 管理面板
+- **完整卸载** - 彻底清除服务、程序和所有配置文件
+
+---
+
+## 系统要求
+
+- macOS（在 macOS 12+ 上测试）
+- zsh shell（macOS 默认）
 - curl
-- python3 (for parsing GitHub API responses)
-- sudo privileges (for installing to /usr/local/bin)
+- python3（用于解析 GitHub API 响应）
+- sudo 权限（用于安装到 /usr/local/bin）
 
 ---
 
-## Installation
+## 安装
 
-1. Download the script:
+1. 下载脚本：
 
 ```bash
 curl -LO https://raw.githubusercontent.com/livingfree2023/MihomoMacCLI/main/mihomo-mac-cli.sh
 ```
 
-2. Make it executable:
+2. 添加执行权限：
 
 ```bash
 chmod +x mihomo-mac-cli.sh
 ```
 
-3. Run it:
+3. 运行：
 
 ```bash
 ./mihomo-mac-cli.sh
@@ -51,191 +51,191 @@ chmod +x mihomo-mac-cli.sh
 
 ---
 
-## Usage
+## 使用方法
 
-Run the script to access the interactive menu:
+运行脚本以访问交互式菜单：
 
 ```bash
 ./mihomo-mac-cli.sh
 ```
 
-### Menu Options
+### 菜单选项
 
-**[1] Install Mihomo**
+**[1] 安装 Mihomo**
 
-Downloads the latest mihomo binary for your architecture (arm64 or amd64) and installs it to `/usr/local/bin/mihomo`.
+下载适合您架构（arm64 或 amd64）的最新 mihomo 程序并安装到 `/usr/local/bin/mihomo`。
 
-**[2] Import Subscription**
+**[2] 导入订阅**
 
-Import a proxy configuration by:
-- Providing a subscription URL (http/https)
-- Providing a path to a local .yaml file
+通过以下方式导入代理配置：
+- 提供订阅 URL（http/https）
+- 提供本地 .yaml 文件的路径
 
-You'll be prompted to name the configuration (e.g., "home", "airport", "work").
+系统会提示您为配置命名（例如："home"、"airport"、"work"）。
 
-**[3] Select Config**
+**[3] 选择配置**
 
-View all imported configurations and switch between them. The active configuration is marked with a green indicator.
+查看所有已导入的配置并在它们之间切换。当前激活的配置会以绿色标记。
 
-**[4] Start Service**
+**[4] 启动服务**
 
-Install mihomo as a launchd service that:
-- Starts automatically on system boot
-- Restarts automatically if it crashes
-- Sets system proxy on Wi-Fi interface
-- Uses the port specified in your configuration file
+将 mihomo 安装为 launchd 服务：
+- 系统启动时自动启动
+- 崩溃时自动重启
+- 在 Wi-Fi 接口上设置系统代理
+- 使用配置文件中指定的端口
 
-**[5] Stop Service**
+**[5] 停止服务**
 
-Stop the running mihomo service and restore system proxy settings to off.
+停止运行中的 mihomo 服务并将系统代理设置恢复为关闭。
 
-**[6] Open MetaCubeXD Panel**
+**[6] 打开 MetaCubeXD 面板**
 
-Open the [MetaCubeXD](https://metacubex.github.io/metacubexd/) web dashboard in your default browser for advanced proxy management.
+在默认浏览器中打开 [MetaCubeXD](https://metacubex.github.io/metacubexd/) Web 面板以进行高级代理管理。
 
-**[7] Uninstall**
+**[7] 卸载**
 
-Completely remove:
-- The launchd service
-- The mihomo binary
-- Service scripts and plist files
-- Optionally, all configuration files
+彻底移除：
+- launchd 服务
+- mihomo 程序
+- 服务脚本和 plist 文件
+- 可选：所有配置文件
 
-**[0] Exit**
+**[0] 退出**
 
-Exit the manager.
+退出管理器。
 
 ---
 
-## File Structure
+## 文件结构
 
 ```
-/usr/local/bin/mihomo                          # Mihomo binary
+/usr/local/bin/mihomo                          # Mihomo 程序
 ~/.config/mihomo/
-├── config.yaml                                # Symlink to active config
-├── configs/                                   # All imported configurations
+├── config.yaml                                # 指向当前配置的符号链接
+├── configs/                                   # 所有导入的配置
 │   ├── home.yaml
 │   ├── airport.yaml
 │   └── work.yaml
-├── mihomo-service.sh                          # Auto-generated service wrapper
-├── service.log                                # Service stdout log
-└── service.err                                # Service stderr log
+├── mihomo-service.sh                          # 自动生成的服务包装脚本
+├── service.log                                # 服务标准输出日志
+└── service.err                                # 服务错误输出日志
 
 ~/Library/LaunchAgents/
-└── com.mihomo.service.plist                   # Launchd service definition
+└── com.mihomo.service.plist                   # Launchd 服务定义
 ```
 
 ---
 
-## Configuration
+## 配置说明
 
-Your mihomo configuration file (.yaml) should include at minimum:
+您的 mihomo 配置文件（.yaml）至少应包含：
 
 ```yaml
 mixed-port: 1080  # or port: 1080
 mode: rule
 ```
 
-The script automatically detects the proxy port from `mixed-port` or `port` fields in your configuration.
+脚本会自动从配置中的 `mixed-port` 或 `port` 字段检测代理端口。
 
-### Example Configuration
+### 示例配置
 
-For a complete example with DNS, proxy providers, and routing rules, see the [mihomo documentation](https://wiki.metacubex.one/).
-
----
-
-## How It Works
-
-1. **Service Installation**: The script generates a wrapper shell script and a launchd plist file, then registers the service with `launchctl bootstrap`.
-
-2. **System Proxy**: When the service starts, it uses `networksetup` to configure HTTP, HTTPS, and SOCKS proxy settings on the Wi-Fi interface.
-
-3. **Config Switching**: Multiple configurations are stored in `~/.config/mihomo/configs/`. The active configuration is a symlink at `~/.config/mihomo/config.yaml`.
-
-4. **Port Detection**: The script parses your YAML configuration to extract the proxy port, ensuring the system proxy matches your mihomo settings.
+有关包含 DNS、代理提供者和路由规则的完整示例，请参阅 [mihomo 文档](https://wiki.metacubex.one/)。
 
 ---
 
-## Troubleshooting
+## 工作原理
 
-**Service won't start**
+1. **服务安装**：脚本生成包装 shell 脚本和 launchd plist 文件，然后使用 `launchctl bootstrap` 注册服务。
 
-Check the error log:
+2. **系统代理**：服务启动时，使用 `networksetup` 在 Wi-Fi 接口上配置 HTTP、HTTPS 和 SOCKS 代理设置。
+
+3. **配置切换**：多个配置存储在 `~/.config/mihomo/configs/` 中。当前激活的配置是 `~/.config/mihomo/config.yaml` 的符号链接。
+
+4. **端口检测**：脚本解析您的 YAML 配置以提取代理端口，确保系统代理与您的 mihomo 设置匹配。
+
+---
+
+## 故障排除
+
+**服务无法启动**
+
+检查错误日志：
 
 ```bash
 cat ~/.config/mihomo/service.err
 ```
 
-**Proxy not working**
+**代理不工作**
 
-1. Verify the service is running:
+1. 验证服务是否运行：
 
 ```bash
 launchctl print gui/$(id -u)/com.mihomo.service
 ```
 
-2. Check system proxy settings:
+2. 检查系统代理设置：
 
 ```bash
 networksetup -getwebproxy Wi-Fi
 ```
 
-3. Verify your configuration is valid:
+3. 验证配置是否有效：
 
 ```bash
 /usr/local/bin/mihomo -t -f ~/.config/mihomo/config.yaml
 ```
 
-**Can't connect to API providers**
+**无法连接到 API 提供者**
 
-Ensure your proxy configuration includes proper DNS settings and that the mihomo service is running before launching applications that need proxy access.
+确保您的代理配置包含正确的 DNS 设置，并且在启动需要代理访问的应用程序之前 mihomo 服务正在运行。
 
 ---
 
-## Uninstall
+## 卸载
 
-To completely remove mihomo and all related files:
+要彻底移除 mihomo 及所有相关文件：
 
 ```bash
 ./mihomo-mac-cli.sh
-# Select option [7] Uninstall
+# 选择选项 [7] 卸载
 ```
 
-Or manually:
+或手动：
 
 ```bash
-# Stop and remove service
+# 停止并移除服务
 launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.mihomo.service.plist
 rm ~/Library/LaunchAgents/com.mihomo.service.plist
 
-# Remove binary
+# 移除程序
 sudo rm /usr/local/bin/mihomo
 
-# Remove configuration
+# 移除配置
 rm -rf ~/.config/mihomo
 ```
 
 ---
 
-## Contributing
+## 贡献
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
-
----
-
-## License
-
-MIT License - See [LICENSE](LICENSE) file for details.
+欢迎贡献！请随时提交问题或拉取请求。
 
 ---
 
-## Credits
+## 许可证
 
-- [mihomo](https://github.com/MetaCubeX/mihomo) - The core proxy engine
-- [MetaCubeXD](https://github.com/MetaCubeX/metacubexd) - Web dashboard
+MIT 许可证 - 详情请参阅 [LICENSE](LICENSE) 文件。
 
 ---
 
-## Support
+## 致谢
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/livingfree2023/MihomoMacCLI/issues).
+- [mihomo](https://github.com/MetaCubeX/mihomo) - 核心代理引擎
+- [MetaCubeXD](https://github.com/MetaCubeX/metacubexd) - Web 面板
+
+---
+
+## 支持
+
+如果您遇到任何问题或有疑问，请[提交问题](https://github.com/livingfree2023/MihomoMacCLI/issues)。
