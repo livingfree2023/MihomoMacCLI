@@ -39,8 +39,8 @@ STR_EN[invalid_option]="Invalid option"
 STR_ZH[invalid_option]="无效选项"
 STR_EN[press_enter]="Press Enter to continue..."
 STR_ZH[press_enter]="按回车键继续..."
-STR_EN[menu_prompt]="Choose an option [0-9]"
-STR_ZH[menu_prompt]="请选择 [0-9]"
+STR_EN[menu_prompt]="Choose an option [0-10]"
+STR_ZH[menu_prompt]="请选择 [0-10]"
 
 # Menu items
 STR_EN[menu_install]="Install Mihomo"
@@ -75,6 +75,10 @@ STR_EN[menu_language]="Language / 语言"
 STR_ZH[menu_language]="Language / 语言"
 STR_EN[menu_language_desc]="Switch display language"
 STR_ZH[menu_language_desc]="切换显示语言"
+STR_EN[menu_update]="Update Config"
+STR_ZH[menu_update]="更新配置"
+STR_EN[menu_update_desc]="Re-fetch config from URL or local file"
+STR_ZH[menu_update_desc]="从 URL 或本地文件重新获取配置"
 STR_EN[menu_exit]="Exit"
 STR_ZH[menu_exit]="退出"
 
@@ -161,6 +165,18 @@ STR_EN[set_active_config]="Set as active config: %s.yaml"
 STR_ZH[set_active_config]="已设为当前配置: %s.yaml"
 STR_EN[detected_port]="Detected proxy port: %s"
 STR_ZH[detected_port]="检测到代理端口: %s"
+
+# Update Config
+STR_EN[update_header]="── Update Config ──"
+STR_ZH[update_header]="── 更新配置 ──"
+STR_EN[update_select_config]="Select config to update"
+STR_ZH[update_select_config]="选择要更新的配置"
+STR_EN[update_source_prompt]="Enter new URL or path to .yaml file"
+STR_ZH[update_source_prompt]="输入新的 URL 或 .yaml 文件路径"
+STR_EN[update_success]="Config updated: %s.yaml"
+STR_ZH[update_success]="配置已更新: %s.yaml"
+STR_EN[update_failed]="Failed to update config"
+STR_ZH[update_failed]="更新配置失败"
 
 # Select Config
 STR_EN[select_header]="── Select Config ──"
@@ -722,6 +738,114 @@ import_subscription() {
 }
 
 # ---------------------------------------------------------------------------
+# Update Config
+# ---------------------------------------------------------------------------
+
+update_config() {
+    print ""
+    print "${BOLD}$(_ update_header)${NC}"
+    print ""
+
+    if [[ ! -d "$MIHOMO_CONFIGS_DIR" ]]; then
+        warn "$(_ no_configs_dir)"
+        return 1
+    fi
+
+    local configs=()
+    local names=()
+    local i=1
+    local active_name
+    active_name=$(get_active_config_name)
+
+    for f in "$MIHOMO_CONFIGS_DIR"/*.yaml(N); do
+        local name
+        name=$(basename "$f" .yaml)
+        local port
+        port=$(extract_port "$f")
+        configs+=("$f")
+        names+=("$name")
+        if [[ "$name" == "$active_name" ]]; then
+            print "  ${GREEN}[${i}]${NC} ${BOLD}${name}.yaml${NC} ($(_ port_label): ${port}) ${GREEN}← $(_ active_label)${NC}"
+        else
+            print "  ${BOLD}[${i}]${NC} ${name}.yaml ($(_ port_label): ${port})"
+        fi
+        ((i++))
+    done
+
+    if [[ ${#configs[@]} -eq 0 ]]; then
+        warn "$(_ no_config_files)"
+        return 1
+    fi
+
+    print ""
+    print -n "${CYAN}$(_ update_select_config): ${NC}"
+    local choice
+    read -r choice
+
+    if [[ -z "$choice" ]]; then
+        info "$(_ cancelled)"
+        return 0
+    fi
+
+    if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#configs[@]} )); then
+        error "$(_ invalid_selection)"
+        return 1
+    fi
+
+    local target_file="${configs[$choice]}"
+    local config_name="${names[$choice]}"
+
+    print ""
+    print "$(_ update_source_prompt)"
+    print -n "${CYAN}> ${NC}"
+    local input
+    read -r input
+
+    input="${input#[\"\']}"
+    input="${input%[\"\']}"
+
+    if [[ -z "$input" ]]; then
+        error "$(_ empty_input)"
+        return 1
+    fi
+
+    local backup_file="${target_file}.bak"
+    cp "$target_file" "$backup_file"
+
+    if [[ -f "$input" ]]; then
+        info "$(_ copying_local "$input")"
+        cp "$input" "$target_file"
+    elif [[ "$input" =~ ^https?:// ]]; then
+        info "$(_ downloading_sub)"
+        if ! curl -fSL --progress-bar -o "$target_file" "$input"; then
+            error "$(_ download_sub_failed)"
+            mv "$backup_file" "$target_file"
+            return 1
+        fi
+    else
+        error "$(_ invalid_input)"
+        mv "$backup_file" "$target_file"
+        return 1
+    fi
+
+    if "$MIHOMO_BIN" -t -f "$target_file" &>/dev/null; then
+        rm -f "$backup_file"
+        success "$(_ update_success "$config_name")"
+        local port
+        port=$(extract_port "$target_file")
+        info "$(_ detected_port "$port")"
+        if [[ "$config_name" == "$active_name" ]] && is_service_running; then
+            warn "$(_ restart_to_apply)"
+        fi
+    else
+        warn "$(_ config_warning)"
+        mv "$backup_file" "$target_file"
+        warn "$(_ update_failed)"
+        return 1
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # 3. Select Config
 # ---------------------------------------------------------------------------
 
@@ -1035,6 +1159,7 @@ show_menu() {
     print "  ${BOLD}[7]${NC} $(_ menu_uninstall) - $(_ menu_uninstall_desc)"
     print "  ${BOLD}[8]${NC} $(_ menu_language) - $(_ menu_language_desc)"
     print "  ${BOLD}[9]${NC} $(_ menu_interface) - $(_ menu_interface_desc)"
+    print "  ${BOLD}[10]${NC} $(_ menu_update) - $(_ menu_update_desc)"
     print "  ${BOLD}[0]${NC} $(_ menu_exit)"
     print "${BOLD}───────────────────────────────────────────────────────${NC}"
     print -n "${CYAN}$(_ menu_prompt): ${NC}"
@@ -1056,6 +1181,7 @@ main() {
             7) uninstall_all; press_enter ;;
             8) select_language; press_enter ;;
             9) select_interface; press_enter ;;
+            10) update_config; press_enter ;;
             0|q|Q)
                 print ""
                 print "${GREEN}$(_ goodbye)${NC}"
