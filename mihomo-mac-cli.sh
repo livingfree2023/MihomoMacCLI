@@ -177,6 +177,12 @@ STR_EN[update_success]="Config updated: %s.yaml"
 STR_ZH[update_success]="配置已更新: %s.yaml"
 STR_EN[update_failed]="Failed to update config"
 STR_ZH[update_failed]="更新配置失败"
+STR_EN[update_last_source]="Last source: %s"
+STR_ZH[update_last_source]="上次来源: %s"
+STR_EN[update_no_source]="No saved source. Enter a new one."
+STR_ZH[update_no_source]="无保存的来源，请输入新的来源。"
+STR_EN[update_using_last]="Using last source: %s"
+STR_ZH[update_using_last]="使用上次来源: %s"
 
 # Select Config
 STR_EN[select_header]="── Select Config ──"
@@ -494,6 +500,23 @@ get_active_config_name() {
     fi
 }
 
+save_config_source() {
+    local config_name="$1"
+    local source="$2"
+    local source_file="$MIHOMO_CONFIGS_DIR/${config_name}.source"
+    print "$source" > "$source_file"
+}
+
+load_config_source() {
+    local config_name="$1"
+    local source_file="$MIHOMO_CONFIGS_DIR/${config_name}.source"
+    if [[ -f "$source_file" ]]; then
+        tr -d '\n' < "$source_file"
+    else
+        echo ""
+    fi
+}
+
 # ---------------------------------------------------------------------------
 # Status Check
 # ---------------------------------------------------------------------------
@@ -731,6 +754,8 @@ import_subscription() {
         ln -sf "$target_file" "$MIHOMO_CONFIG"
         success "$(_ set_active_config "$config_name")"
 
+        save_config_source "$config_name" "$input"
+
         local port
         port=$(extract_port "$target_file")
         info "$(_ detected_port "$port")"
@@ -757,17 +782,20 @@ update_config() {
     local active_name
     active_name=$(get_active_config_name)
 
+    local name port saved_source
     for f in "$MIHOMO_CONFIGS_DIR"/*.yaml(N); do
-        local name
         name=$(basename "$f" .yaml)
-        local port
         port=$(extract_port "$f")
+        saved_source=$(load_config_source "$name")
         configs+=("$f")
         names+=("$name")
         if [[ "$name" == "$active_name" ]]; then
             print "  ${GREEN}[${i}]${NC} ${BOLD}${name}.yaml${NC} ($(_ port_label): ${port}) ${GREEN}← $(_ active_label)${NC}"
         else
             print "  ${BOLD}[${i}]${NC} ${name}.yaml ($(_ port_label): ${port})"
+        fi
+        if [[ -n "$saved_source" ]]; then
+            print "      $(_ update_last_source "$saved_source")"
         fi
         ((i++))
     done
@@ -795,8 +823,16 @@ update_config() {
     local target_file="${configs[$choice]}"
     local config_name="${names[$choice]}"
 
+    local last_source
+    last_source=$(load_config_source "$config_name")
+
     print ""
-    print "$(_ update_source_prompt)"
+    if [[ -n "$last_source" ]]; then
+        print "$(_ update_last_source "$last_source")"
+        print "$(_ update_source_prompt)"
+    else
+        print "$(_ update_no_source)"
+    fi
     print -n "${CYAN}> ${NC}"
     local input
     read -r input
@@ -805,8 +841,13 @@ update_config() {
     input="${input%[\"\']}"
 
     if [[ -z "$input" ]]; then
-        error "$(_ empty_input)"
-        return 1
+        if [[ -n "$last_source" ]]; then
+            input="$last_source"
+            info "$(_ update_using_last "$input")"
+        else
+            error "$(_ empty_input)"
+            return 1
+        fi
     fi
 
     local backup_file="${target_file}.bak"
@@ -830,6 +871,7 @@ update_config() {
 
     if "$MIHOMO_BIN" -t -f "$target_file" &>/dev/null; then
         rm -f "$backup_file"
+        save_config_source "$config_name" "$input"
         success "$(_ update_success "$config_name")"
         local port
         port=$(extract_port "$target_file")
@@ -864,10 +906,9 @@ select_config() {
     local active_name
     active_name=$(get_active_config_name)
 
+    local name port
     for f in "$MIHOMO_CONFIGS_DIR"/*.yaml(N); do
-        local name
         name=$(basename "$f" .yaml)
-        local port
         port=$(extract_port "$f")
         if [[ "$name" == "$active_name" ]]; then
             configs+=("$f")
