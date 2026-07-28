@@ -183,6 +183,12 @@ STR_EN[update_no_source]="No saved source. Enter a new one."
 STR_ZH[update_no_source]="无保存的来源，请输入新的来源。"
 STR_EN[update_using_last]="Using last source: %s"
 STR_ZH[update_using_last]="使用上次来源: %s"
+STR_EN[update_restarting]="Restarting service to apply new config..."
+STR_ZH[update_restarting]="正在重启服务以应用新配置..."
+STR_EN[update_restart_success]="Service restarted successfully"
+STR_ZH[update_restart_success]="服务重启成功"
+STR_EN[update_restart_failed]="Failed to restart service"
+STR_ZH[update_restart_failed]="服务重启失败"
 
 # Select Config
 STR_EN[select_header]="── Select Config ──"
@@ -877,7 +883,12 @@ update_config() {
         port=$(extract_port "$target_file")
         info "$(_ detected_port "$port")"
         if [[ "$config_name" == "$active_name" ]] && is_service_running; then
-            warn "$(_ restart_to_apply)"
+            info "$(_ update_restarting)"
+            if launchctl kickstart -k gui/$(id -u)/com.mihomo-mac-cli.service 2>/dev/null; then
+                success "$(_ update_restart_success)"
+            else
+                error "$(_ update_restart_failed)"
+            fi
         fi
     else
         warn "$(_ config_warning)"
